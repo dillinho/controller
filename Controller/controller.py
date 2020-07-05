@@ -10,12 +10,9 @@ Created on Fri Jun  5 12:38:06 2020
 #---------
 import tkinter as tk
 
-
-
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 # import matplotlib.pyplot as plt
-#----------
 
 import time
 
@@ -23,7 +20,7 @@ import pandas as pd
 import numpy as np
 
 import nidaqmx
-
+#----------
 
 
 
