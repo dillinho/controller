@@ -4,24 +4,28 @@ Created on Fri Jun  5 12:38:06 2020
 
 @author: Manuel
 """
+
+
+
+#---------
 from tkinter import *
-from tkinter import ttk 
-from random import random
+from tkinter.ttk import *
+
+
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import matplotlib.pyplot as plt
+#----------
+
 import datetime
 import time
+
 import pandas as pd
+import numpy as np
 
 import nidaqmx
 
-import csv # for dummy read/write
-import os # for dummy read/write
 
-import numpy as np
-
-import matplotlib.backends.tkagg as tkagg
-from matplotlib.backends.backend_agg import FigureCanvasAgg
-#import matplotlib.pyplot as plt
-import matplotlib as mpl
 
 
 def startupdatGraph():
@@ -30,27 +34,32 @@ def startupdatGraph():
         root.after(1000,startupdatGraph)
     
 def updateGraph():
-    global yIn, yOut, canvas,fig_photo
-    fig = mpl.figure.Figure(figsize=(5, 3))
-    ax = fig.add_subplot(111)
-    ax.plot(np.array(yIn))
-    ax.set_xlim([0,10000])
-    fig_photo = draw_figure(canvas, fig)
+    global yIn, yOut, line1, canvas, ax
+    
+
+    # fig = mpl.figure.Figure(figsize=(5, 3))
+
+    line1.set_data(np.arange(len(yIn)),np.array(yIn))
+    ax.relim()
+    ax.autoscale_view(True,True,True)
+    
+ 
+    canvas = FigureCanvasTkAgg(fig, root)
+    canvas.get_tk_widget().grid(row=0, column=2)
+    
+    # fig_photo = draw_figure(canvas, fig)
     
 def startController():
     global run, yIn, startTime
+    print("Controller is running!")
     yIn=[]
     run = True
     startTime = datetime.datetime.now()
     startupdatGraph()
     runController()
     
-def stopController():
-    global run, count, startTime, stopTime, timeList
-    
-    
-    df_timeList = pd.DataFrame(timeList)
-    
+def eval_timestamps():
+    global timeList, startTime, stopTime
     
     
     stopTime = datetime.datetime.now()
@@ -60,18 +69,26 @@ def stopController():
     print("Count = " + str(count))
     print("deltaT in ms: " + str(deltaTms))
     print("Time per cycle [ms]: " + str(deltaTms/count))
- 
-    count = 0
+    df_timeList = pd.DataFrame(timeList)
+    df_timeList.columns = ['Time_ns']
+    df_timeList["dt_ns"] = df_timeList.Time_ns.diff().fillna(0).astype(int)
+    df_timeList["Time_ms"] = df_timeList["Time_ns"]/1e6
+    df_timeList["Time_ms"] = df_timeList["Time_ms"].astype("int64")
+    
+    df_timeList["dt_ms"] = df_timeList.Time_ms.diff().fillna(0).astype(int)
+    
+    df_timeList["dt_ms"].hist()
+    
+    print(df_timeList.dtypes)
+    
+    
+def stopController():
+    global run
+
     run = False
     updateGraph()
     
-def readInput():
-    return random()
-    
-def writeOutput(output):
-    with open('output.csv', 'w') as output_file:
-        outputTask = csv.writer(output_file)
-        outputTask.writerow([output])
+    eval_timestamps()    
 
 def runController(*args):
     if run == True:
@@ -80,18 +97,16 @@ def runController(*args):
         
         global inputTask, outputTask, yIn, yOut, count, timeList
         count=count+1
-#        t = datetime.datetime.now()
-#        timeList.append(t.second + t.microsecond*1e6)
-        df_timeList["dt"]
+        time.time_ns()
+        timeList.append(time.time_ns())
+
         inp = inputTask.read()
-#        inp = readInput() #dummy: read from csv or random
 
         output = calcOutputAlg1(inp)
         yIn.append(inp)
         yOut.append(output)
                     
         outputTask.write(output)
-#        writeOutput(output) # dummy: write to csv
 
 def calcOutputAlg1(inp):
 #    P = pPart.get()
@@ -108,27 +123,6 @@ def calcOutputAlg3(inp):
     output = inp+3
     return output
 
-def draw_figure(canvas, figure, loc=(0, 0)):
-    """ Draw a matplotlib figure onto a Tk canvas
-
-    loc: location of top-left corner of figure on canvas in pixels.
-    Inspired by matplotlib source: lib/matplotlib/backends/backend_tkagg.py
-    """
-    figure_canvas_agg = FigureCanvasAgg(figure)
-    figure_canvas_agg.draw()
-    figure_x, figure_y, figure_w, figure_h = figure.bbox.bounds
-    figure_w, figure_h = int(figure_w), int(figure_h)
-    photo = PhotoImage(master=canvas, width=figure_w, height=figure_h)
-
-    # Position: convert from top-left anchor to center anchor
-    canvas.create_image(loc[0] + figure_w/2, loc[1] + figure_h/2, image=photo)
-
-    # Unfortunately, there's no accessor for the pointer to the native renderer
-    tkagg.blit(photo, figure_canvas_agg.get_renderer()._renderer, colormode=2)
-
-    # Return a handle which contains a reference to the photo object
-    # which must be kept live or else the picture disappears
-    return photo
 
 root = Tk()
 root.title("PID controller")
@@ -149,59 +143,55 @@ algorithmus = StringVar()
 
 
 #ttk.Label(mainframe, text="feet").grid(column=3, row=1, sticky=W)
-ttk.Label(mainframe, text="P-Part").grid(column=1, row=2, sticky=E)
-ttk.Label(mainframe, text="I-Part").grid(column=1, row=3, sticky=E)
-ttk.Label(mainframe, text="D-Part").grid(column=1, row=4, sticky=E)
+Label(mainframe, text="P-Part").grid(column=1, row=2, sticky=E) # ttk.Label()
+Label(mainframe, text="I-Part").grid(column=1, row=3, sticky=E)
+Label(mainframe, text="D-Part").grid(column=1, row=4, sticky=E)
 
 
-pPart_entry = ttk.Entry(mainframe, width=7, textvariable=pPart)
+pPart_entry = Entry(mainframe, width=7, textvariable=pPart) # ttk.Entry()
 pPart_entry.grid(column=2, row=2, sticky=(W, E))
 
-iPart_entry = ttk.Entry(mainframe, width=7, textvariable=iPart)
+iPart_entry = Entry(mainframe, width=7, textvariable=iPart)
 iPart_entry.grid(column=2, row=3, sticky=(W, E))
 
-dPart_entry = ttk.Entry(mainframe, width=7, textvariable=dPart)
+dPart_entry = Entry(mainframe, width=7, textvariable=dPart)
 dPart_entry.grid(column=2, row=4, sticky=(W, E))
 
 
-ttk.Button(mainframe, text="Start Control Loop", command=startController).grid(column=1, columnspan = 2,row=5, sticky=EW)
-ttk.Button(mainframe, text="Stop", command=stopController).grid(column=1, columnspan = 2,row=6, sticky=EW)
+Button(mainframe, text="Start Control Loop", command=startController).grid(column=1, columnspan = 2,row=5, sticky=EW)
+Button(mainframe, text="Stop", command=stopController).grid(column=1, columnspan = 2,row=6, sticky=EW)
 
 
-for child in mainframe.winfo_children(): child.grid_configure(padx=50, pady=5)
+for child in mainframe.winfo_children(): 
+    child.grid_configure(padx=50, pady=5)
 
 pPart_entry.focus()
 root.bind('<Return>', startController)
 
 
-w, h = 500, 300
-canvas = Canvas(root, width=w, height=h)
-canvas.grid(column=3, row=0,rowspan=5,sticky=NS)
 
-# Generate some example data
-X = 0
-Y = 0
+# List to hold values
 yIn = []
 yOut = []
 
+# Values/lists for evaluation the read/write frequency
 startTime = 0
 stopTime = 0
 count = 0
 timeList = []
-# Create the figure we desire to add to an existing canvas
-fig = mpl.figure.Figure(figsize=(5, 3))
-ax = fig.add_subplot(111)
-ax.set_xlim([0,10000])
-#ax.plot(X,Y)
 
-# Keep this handle alive, or else figure will disappear
-fig_photo = draw_figure(canvas, fig)
 
-# remove csv-file before writing again
-try:
-    os.remove('output.csv')
-except:
-    print("No output.csv availible")
+# Generate some start/example data
+X = 0
+Y = 0
+# Setup the graph
+fig = Figure(figsize=(5, 3), dpi=100)
+ax = fig.add_subplot(1, 1, 1)
+line1, = ax.plot(X, Y)
+plt.title("Input Data")
+canvas = FigureCanvasTkAgg(fig, root)
+canvas.get_tk_widget().grid(row=0, column=2)
+
 with nidaqmx.Task() as inputTask,nidaqmx.Task() as outputTask:
     device = "Dev2"
     inputTask.ai_channels.add_ai_voltage_chan(device + "/ai0")
