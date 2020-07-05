@@ -8,16 +8,15 @@ Created on Fri Jun  5 12:38:06 2020
 
 
 #---------
-from tkinter import *
-from tkinter.ttk import *
+import tkinter as tk
+
 
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 #----------
 
-import datetime
 import time
 
 import pandas as pd
@@ -28,17 +27,9 @@ import nidaqmx
 
 
 
-def startupdatGraph():
-    updateGraph()
-    if run == True:
-        root.after(1000,startupdatGraph)
-    
 def updateGraph():
-    global yIn, yOut, line1, canvas, ax
+    global yIn, yOut, line1, canvas, ax, fig
     
-
-    # fig = mpl.figure.Figure(figsize=(5, 3))
-
     line1.set_data(np.arange(len(yIn)),np.array(yIn))
     ax.relim()
     ax.autoscale_view(True,True,True)
@@ -47,14 +38,17 @@ def updateGraph():
     canvas = FigureCanvasTkAgg(fig, root)
     canvas.get_tk_widget().grid(row=0, column=2)
     
-    # fig_photo = draw_figure(canvas, fig)
+def startupdatGraph():
+    updateGraph()
+    if run == True:
+        root.after(1000,startupdatGraph)
     
 def startController():
     global run, yIn, startTime
     print("Controller is running!")
     yIn=[]
     run = True
-    startTime = datetime.datetime.now()
+    startTime = time.time()
     startupdatGraph()
     runController()
     
@@ -62,9 +56,9 @@ def eval_timestamps():
     global timeList, startTime, stopTime
     
     
-    stopTime = datetime.datetime.now()
+    stopTime = time.time()
     deltaT = stopTime - startTime
-    deltaTms = deltaT.seconds*1000 + deltaT.microseconds/1000
+    deltaTms = deltaT*1e3
 
     print("Count = " + str(count))
     print("deltaT in ms: " + str(deltaTms))
@@ -124,42 +118,46 @@ def calcOutputAlg3(inp):
     return output
 
 
-root = Tk()
+
+root = tk.Tk()
 root.title("PID controller")
 
 run = True
 
-mainframe = ttk.Frame(root, padding="3 3 12 12")
-mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
+mainframe = tk.Frame(root)#, padding="3 3 12 12") 
+mainframe.grid(column=0, row=0, sticky=(tk.N, tk.W, tk.E, tk.S))
 root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
 
 
-pPart = StringVar()
-iPart = StringVar()
-dPart = StringVar()
+pPart = tk.StringVar()
+iPart = tk.StringVar()
+dPart = tk.StringVar()
+setPoint = tk.StringVar()
 
-algorithmus = StringVar()
-
-
-#ttk.Label(mainframe, text="feet").grid(column=3, row=1, sticky=W)
-Label(mainframe, text="P-Part").grid(column=1, row=2, sticky=E) # ttk.Label()
-Label(mainframe, text="I-Part").grid(column=1, row=3, sticky=E)
-Label(mainframe, text="D-Part").grid(column=1, row=4, sticky=E)
+algorithmus = tk.StringVar()
 
 
-pPart_entry = Entry(mainframe, width=7, textvariable=pPart) # ttk.Entry()
-pPart_entry.grid(column=2, row=2, sticky=(W, E))
+#ttk.Label(mainframe, text="feet").grid(column=3, row=1, sticky=tk.W)
+tk.Label(mainframe, text="P-Part").grid(column=1, row=2, sticky=tk.E)
+tk.Label(mainframe, text="I-Part").grid(column=1, row=3, sticky=tk.E)
+tk.Label(mainframe, text="D-Part").grid(column=1, row=4, sticky=tk.E)
+tk.Label(mainframe, text="Set Point").grid(column=1, row=5, sticky=tk.E)
 
-iPart_entry = Entry(mainframe, width=7, textvariable=iPart)
-iPart_entry.grid(column=2, row=3, sticky=(W, E))
+pPart_entry = tk.Entry(mainframe, width=7, textvariable=pPart) # ttk.Entry()
+pPart_entry.grid(column=2, row=2, sticky=(tk.W, tk.E))
 
-dPart_entry = Entry(mainframe, width=7, textvariable=dPart)
-dPart_entry.grid(column=2, row=4, sticky=(W, E))
+iPart_entry = tk.Entry(mainframe, width=7, textvariable=iPart)
+iPart_entry.grid(column=2, row=3, sticky=(tk.W, tk.E))
 
+dPart_entry = tk.Entry(mainframe, width=7, textvariable=dPart)
+dPart_entry.grid(column=2, row=4, sticky=(tk.W, tk.E))
 
-Button(mainframe, text="Start Control Loop", command=startController).grid(column=1, columnspan = 2,row=5, sticky=EW)
-Button(mainframe, text="Stop", command=stopController).grid(column=1, columnspan = 2,row=6, sticky=EW)
+setPoint_entry = tk.Entry(mainframe, width=7, textvariable=setPoint)
+setPoint_entry.grid(column=2, row=5, sticky=(tk.W, tk.E))
+
+tk.Button(mainframe, text="Start Control Loop", command=startController).grid(column=1, columnspan = 2,row=5, sticky=tk.EW)
+tk.Button(mainframe, text="Stop", command=stopController).grid(column=1, columnspan = 2,row=6, sticky=tk.EW)
 
 
 for child in mainframe.winfo_children(): 
@@ -188,7 +186,7 @@ Y = 0
 fig = Figure(figsize=(5, 3), dpi=100)
 ax = fig.add_subplot(1, 1, 1)
 line1, = ax.plot(X, Y)
-plt.title("Input Data")
+ax.set_title("Input Signal")
 canvas = FigureCanvasTkAgg(fig, root)
 canvas.get_tk_widget().grid(row=0, column=2)
 
