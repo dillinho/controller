@@ -39,18 +39,32 @@ def startupdatGraph():
     updateGraph()
     if run == True:
         root.after(1000,startupdatGraph)
-    
-def startController():
-    global run, yIn, startTime
-    print("Controller is running!")
-    yIn=[]
+
+def check_DI_2start():
+    print(digitalInputTask.read())
+
+def activateController():
+    global run, yIn, yOut, timeList, startTime
     run = True
-    startTime = time.time()
-    startupdatGraph()
-    runController()
+    timeList = []
+    count = 0
+    yIn=[]
+    yOut=[]
+    print("Controller is active!")
+    while not digitalInputTask.read():
+        time.sleep(1e-3)
+        
+        if not run:
+            break
+    if run:
+        print("Controller is running!")
+  
+        startTime = time.time()
+        startupdatGraph()
+        runController()
     
 def eval_timestamps():
-    global timeList, startTime, stopTime
+    global timeList, startTime, stopTime, count
     
     
     stopTime = time.time()
@@ -71,15 +85,33 @@ def eval_timestamps():
     df_timeList["dt_ms"].hist()
     
     print(df_timeList.dtypes)
+
+
+def logValues2csv():
+    global timeList, yIn, yOut
     
+
+    print(len(timeList))
+    print(len(yIn))
+    print(len(yOut))
+    
+    
+    df = pd.DataFrame(
+    {'Time': timeList,
+      'yIn': yIn,
+      'yOut': yOut
+      })
+    df.to_csv("valueLogs\\vals.csv",index=False,sep=";")
     
 def stopController():
-    global run
+    global run, logVals
 
     run = False
     updateGraph()
     
-    eval_timestamps()    
+    eval_timestamps()  
+    if logVals:
+        logValues2csv()
 
 def runController(*args):
     if run == True:
@@ -153,7 +185,7 @@ dPart_entry.grid(column=2, row=4, sticky=(tk.W, tk.E))
 setPoint_entry = tk.Entry(mainframe, width=7, textvariable=setPoint)
 setPoint_entry.grid(column=2, row=5, sticky=(tk.W, tk.E))
 
-tk.Button(mainframe, text="Start Control Loop", command=startController).grid(column=1, columnspan = 2,row=5, sticky=tk.EW)
+tk.Button(mainframe, text="Start Control Loop", command=activateController).grid(column=1, columnspan = 2,row=5, sticky=tk.EW)
 tk.Button(mainframe, text="Stop", command=stopController).grid(column=1, columnspan = 2,row=6, sticky=tk.EW)
 
 
@@ -161,7 +193,7 @@ for child in mainframe.winfo_children():
     child.grid_configure(padx=50, pady=5)
 
 pPart_entry.focus()
-root.bind('<Return>', startController)
+root.bind('<Return>', activateController)
 
 
 
@@ -174,7 +206,7 @@ startTime = 0
 stopTime = 0
 count = 0
 timeList = []
-
+logVals = True
 
 # Generate some start/example data
 X = 0
@@ -187,10 +219,11 @@ ax.set_title("Input Signal")
 canvas = FigureCanvasTkAgg(fig, root)
 canvas.get_tk_widget().grid(row=0, column=2)
 
-with nidaqmx.Task() as inputTask,nidaqmx.Task() as outputTask:
+with nidaqmx.Task() as inputTask,nidaqmx.Task() as outputTask, nidaqmx.Task() as digitalInputTask:
     device = "Dev2"
+    digitalInputTask.di_channels.add_di_chan(device + "/port0/line0")
     inputTask.ai_channels.add_ai_voltage_chan(device + "/ai0")
-    outputTask.ao_channels.add_ao_voltage_chan(device + "/ao0",min_val=0,max_val=5)
+    outputTask.ao_channels.add_ao_voltage_chan(device + "/ao0",min_val=0,max_val=5) # bei usb 6001 max_val = 10
     inputTask.start()
     outputTask.start()
     root.mainloop()
