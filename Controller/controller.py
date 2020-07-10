@@ -52,10 +52,18 @@ def activateController():
     yOut=[]
     print("Controller is active!")
     while not digitalInputTask.read():
-        time.sleep(1e-3)
+        print(digitalInputTask.read())
+        print(digitalInputTask.read())
+        time.sleep(2e-3)
         
         if not run:
             break
+
+###### maybe a startController func is needed and remove the while-loop to not block th ui. instead a root.after is needed maybe
+
+
+        
+        
     if run:
         print("Controller is running!")
   
@@ -101,6 +109,7 @@ def logValues2csv():
       'yIn': yIn,
       'yOut': yOut
       })
+    
     df.to_csv("valueLogs\\vals.csv",index=False,sep=";")
     
 def stopController():
