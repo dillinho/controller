@@ -48,8 +48,8 @@ def activateController():
     run = True
     timeList = []
     count = 0
-    yIn=[]
-    yOut=[]
+    yIn = []
+    yOut = []
     print("Controller is active!")
     while not digitalInputTask.read():
         print(digitalInputTask.read())
