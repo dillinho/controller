@@ -33,7 +33,7 @@ def updateGraph():
     
  
     canvas = FigureCanvasTkAgg(fig, root)
-    canvas.get_tk_widget().grid(row=0, column=2)
+    canvas.get_tk_widget().grid(row = 0, column = 2)
     
 def startupdatGraph():
     updateGraph()
@@ -178,7 +178,7 @@ algorithmus = tk.StringVar()
 
 #ttk.Label(mainframe, text = "feet").grid(column = 3, row = 1, sticky = tk.W)
 tk.Label(mainframe, text = "P-Part").grid(column = 1, row = 2, sticky = tk.E)
-tk.Label(mainframe, text = "I-Part").grid(column = 1, ro w= 3, sticky = tk.E)
+tk.Label(mainframe, text = "I-Part").grid(column = 1, row = 3, sticky = tk.E)
 tk.Label(mainframe, text = "D-Part").grid(column = 1, row = 4, sticky = tk.E)
 tk.Label(mainframe, text = "Set Point").grid(column = 1, row = 5, sticky = tk.E)
 
