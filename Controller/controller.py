@@ -163,9 +163,9 @@ root.title("PID controller")
 run = True
 
 mainframe = tk.Frame(root)#, padding="3 3 12 12") 
-mainframe.grid(column=0, row=0, sticky=(tk.N, tk.W, tk.E, tk.S))
-root.columnconfigure(0, weight=1)
-root.rowconfigure(0, weight=1)
+mainframe.grid(column = 0, row=0, sticky = (tk.N, tk.W, tk.E, tk.S))
+root.columnconfigure(0, weight = 1)
+root.rowconfigure(0, weight = 1)
 
 
 pPart = tk.StringVar()
@@ -176,30 +176,30 @@ setPoint = tk.StringVar()
 algorithmus = tk.StringVar()
 
 
-#ttk.Label(mainframe, text="feet").grid(column=3, row=1, sticky=tk.W)
-tk.Label(mainframe, text="P-Part").grid(column=1, row=2, sticky=tk.E)
-tk.Label(mainframe, text="I-Part").grid(column=1, row=3, sticky=tk.E)
-tk.Label(mainframe, text="D-Part").grid(column=1, row=4, sticky=tk.E)
-tk.Label(mainframe, text="Set Point").grid(column=1, row=5, sticky=tk.E)
+#ttk.Label(mainframe, text = "feet").grid(column = 3, row = 1, sticky = tk.W)
+tk.Label(mainframe, text = "P-Part").grid(column = 1, row = 2, sticky = tk.E)
+tk.Label(mainframe, text = "I-Part").grid(column = 1, ro w= 3, sticky = tk.E)
+tk.Label(mainframe, text = "D-Part").grid(column = 1, row = 4, sticky = tk.E)
+tk.Label(mainframe, text = "Set Point").grid(column = 1, row = 5, sticky = tk.E)
 
-pPart_entry = tk.Entry(mainframe, width=7, textvariable=pPart) # ttk.Entry()
-pPart_entry.grid(column=2, row=2, sticky=(tk.W, tk.E))
+pPart_entry = tk.Entry(mainframe, width = 7, textvariable = pPart) # ttk.Entry()
+pPart_entry.grid(column = 2, row = 2, sticky = (tk.W, tk.E))
 
-iPart_entry = tk.Entry(mainframe, width=7, textvariable=iPart)
-iPart_entry.grid(column=2, row=3, sticky=(tk.W, tk.E))
+iPart_entry = tk.Entry(mainframe, width = 7, textvariable = iPart)
+iPart_entry.grid(column = 2, row = 3, sticky = (tk.W, tk.E))
 
 dPart_entry = tk.Entry(mainframe, width=7, textvariable=dPart)
-dPart_entry.grid(column=2, row=4, sticky=(tk.W, tk.E))
+dPart_entry.grid(column = 2, row = 4, sticky = (tk.W, tk.E))
 
-setPoint_entry = tk.Entry(mainframe, width=7, textvariable=setPoint)
-setPoint_entry.grid(column=2, row=5, sticky=(tk.W, tk.E))
+setPoint_entry = tk.Entry(mainframe, width = 7, textvariable = setPoint)
+setPoint_entry.grid(column = 2, row = 5, sticky = (tk.W, tk.E))
 
-tk.Button(mainframe, text="Start Control Loop", command=activateController).grid(column=1, columnspan = 2,row=5, sticky=tk.EW)
-tk.Button(mainframe, text="Stop", command=stopController).grid(column=1, columnspan = 2,row=6, sticky=tk.EW)
+tk.Button(mainframe, text = "Start Control Loop", command = activateController).grid(column = 1, columnspan = 2,row = 5, sticky = tk.EW)
+tk.Button(mainframe, text = "Stop", command = stopController).grid(column = 1, columnspan = 2,row = 6, sticky = tk.EW)
 
 
 for child in mainframe.winfo_children(): 
-    child.grid_configure(padx=50, pady=5)
+    child.grid_configure(padx = 50, pady = 5)
 
 pPart_entry.focus()
 root.bind('<Return>', activateController)
@@ -221,18 +221,18 @@ logVals = True
 X = 0
 Y = 0
 # Setup the graph
-fig = Figure(figsize=(5, 3), dpi=100)
+fig = Figure(figsize = (5, 3), dpi = 100)
 ax = fig.add_subplot(1, 1, 1)
 line1, = ax.plot(X, Y)
 ax.set_title("Input Signal")
 canvas = FigureCanvasTkAgg(fig, root)
-canvas.get_tk_widget().grid(row=0, column=2)
+canvas.get_tk_widget().grid(row = 0, column = 2)
 
 with nidaqmx.Task() as inputTask,nidaqmx.Task() as outputTask, nidaqmx.Task() as digitalInputTask:
     device = "Dev2"
     digitalInputTask.di_channels.add_di_chan(device + "/port0/line0")
     inputTask.ai_channels.add_ai_voltage_chan(device + "/ai0")
-    outputTask.ao_channels.add_ao_voltage_chan(device + "/ao0",min_val=0,max_val=5) # bei usb 6001 max_val = 10
+    outputTask.ao_channels.add_ao_voltage_chan(device + "/ao0",min_val = 0,max_val = 5) # bei usb 6001 max_val = 10
     inputTask.start()
     outputTask.start()
     root.mainloop()
