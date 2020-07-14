@@ -36,6 +36,13 @@ class myApp(tk.Tk):
         tk.Button( text = "Stop Control Loop", command = self.stopController).grid(column = 1, columnspan = 2,row = 7, sticky = tk.EW)
 
 
+
+
+
+
+
+
+
     def activateController(*args):
         print("In activateController")
 
