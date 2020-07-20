@@ -44,7 +44,7 @@ def check_DI_2start():
     print(digitalInputTask.read())
 
 def activateController():
-    global run, yIn, yOut, timeList, startTime
+    global run, yIn, count, yOut, timeList, startTime
     run = True
     timeList = []
     count = 0
