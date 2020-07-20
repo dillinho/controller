@@ -12,5 +12,5 @@ import tkinter as tk
 
 if __name__ == "__main__":
     # root = tk.Tk()
-    app = c.myApp(tk.Tk())
+    app = c.MyApp(tk.Tk())
     app.mainloop()
