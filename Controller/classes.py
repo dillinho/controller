@@ -72,9 +72,9 @@ class Controller():
             print(self.runController)
             self.app.after(cycleTime,self.runController)
             print("val = {}".format(self.inputTask.read()))
-        # while self.run:
-        #     print(inputTask.read())
-        #     time.sleep(2e-3)            
+        
+        # continue debugging here
+        # and find out why the function just finishes 1 before throwing an error
             
             
             
