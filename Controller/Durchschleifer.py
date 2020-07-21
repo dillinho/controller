@@ -232,7 +232,7 @@ canvas = FigureCanvasTkAgg(fig, root)
 canvas.get_tk_widget().grid(row = 0, column = 2)
 
 with nidaqmx.Task() as inputTask,nidaqmx.Task() as outputTask, nidaqmx.Task() as digitalInputTask:
-    device = "Dev4"
+    device = "Dev5"
     # digitalInputTask.di_channels.add_di_chan(device + "/port0/line0")
     inputTask.ai_channels.add_ai_voltage_chan(device + "/ai0")
     outputTask.ao_channels.add_ao_voltage_chan(device + "/ao0",min_val = 0,max_val = 5) # bei usb 6001 max_val = 10
